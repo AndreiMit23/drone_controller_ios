@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// Reusable touch joystick for NOVA FLIGHT.
@@ -41,7 +42,10 @@ class JoystickValues {
 
 class _DroneJoystickState extends State<DroneJoystick>
     with SingleTickerProviderStateMixin {
-  Offset _position = const Offset(0, -1); // throttle starts at 0%, knob at bottom
+  Offset _position = const Offset(
+    0,
+    -1,
+  ); // throttle starts at 0%, knob at bottom
   Offset _animationStart = Offset.zero;
   Offset _animationEnd = Offset.zero;
   late final AnimationController _returnController;
@@ -63,9 +67,7 @@ class _DroneJoystickState extends State<DroneJoystick>
   void didUpdateWidget(covariant DroneJoystick oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isThrottle != widget.isThrottle) {
-      _position = widget.isThrottle
-          ? const Offset(0, -1)
-          : Offset.zero;
+      _position = widget.isThrottle ? const Offset(0, -1) : Offset.zero;
     }
   }
 
@@ -78,10 +80,14 @@ class _DroneJoystickState extends State<DroneJoystick>
   double _clamp(double value) => value.clamp(-1.0, 1.0).toDouble();
 
   void _emit() {
-    widget.onChanged(JoystickValues(
-      x: _position.dx,
-      y: widget.isThrottle ? ((_position.dy + 1) * 50).clamp(0, 100).toDouble() : _position.dy,
-    ));
+    widget.onChanged(
+      JoystickValues(
+        x: _position.dx,
+        y: widget.isThrottle
+            ? ((_position.dy + 1) * 50).clamp(0, 100).toDouble()
+            : _position.dy,
+      ),
+    );
   }
 
   Offset _normalise(Offset localPosition, Size size) {
@@ -102,9 +108,14 @@ class _DroneJoystickState extends State<DroneJoystick>
     final point = _normalise(event.localPosition, size);
 
     // If the user touches the knob, preserve the offset so it doesn't jump.
-    final knobHit = (Offset(point.dx - _position.dx, point.dy - _position.dy)).distance < .26;
+    final knobHit =
+        (Offset(point.dx - _position.dx, point.dy - _position.dy)).distance <
+        .26;
     final offset = knobHit ? _position - point : Offset.zero;
-    _position = Offset(_clamp(point.dx + offset.dx), _clamp(point.dy + offset.dy));
+    _position = Offset(
+      _clamp(point.dx + offset.dx),
+      _clamp(point.dy + offset.dy),
+    );
     _addTrail();
     _emit();
     setState(() {});
@@ -164,49 +175,73 @@ class _DroneJoystickState extends State<DroneJoystick>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(widget.title.toUpperCase(), style: const TextStyle(
-            color: Color(0xFFE8EAF2), fontSize: 14, fontWeight: FontWeight.w700,
-            letterSpacing: 1.8,
-          )),
-          const SizedBox(height: 5),
-          Text(widget.subtitle.toUpperCase(), style: const TextStyle(
-            color: Color(0xFF8B91A5), fontSize: 10, letterSpacing: 1.6,
-          )),
-          const SizedBox(height: 14),
-          LayoutBuilder(builder: (context, constraints) {
-            final gateSize = math.min(widget.size, math.min(constraints.maxWidth,constraints.maxHeight));
-            return SizedBox(
-              width: gateSize,
-              height: gateSize,
-              child: Listener(
-                onPointerDown: (event) => _start(event, BoxConstraints.tight(Size(gateSize, gateSize))),
-                onPointerMove: (event) => _move(event, BoxConstraints.tight(Size(gateSize, gateSize))),
-                onPointerUp: _end,
-                onPointerCancel: _end,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onPanStart: (details) {
-                    // Listener handles pointer coordinates and capture; this keeps touch gestures active.
-                  },
-                  child: CustomPaint(
-                    painter: _GimbalPainter(
-                      position: _position,
-                      trail: List<Offset>.unmodifiable(_trail),
-                      accent: widget.accent,
-                      isThrottle: widget.isThrottle,
-                      active: _dragging,
+          Text(
+            widget.subtitle.toUpperCase(),
+            style: const TextStyle(
+              color: Color(0xFFE8EAF2),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 2.0,
+            ),
+          ),
+          const SizedBox(height: 8),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final gateSize = math.min(
+                widget.size,
+                math.min(constraints.maxWidth, constraints.maxHeight),
+              );
+              return SizedBox(
+                width: gateSize,
+                height: gateSize,
+                child: Listener(
+                  onPointerDown: (event) => _start(
+                    event,
+                    BoxConstraints.tight(Size(gateSize, gateSize)),
+                  ),
+                  onPointerMove: (event) => _move(
+                    event,
+                    BoxConstraints.tight(Size(gateSize, gateSize)),
+                  ),
+                  onPointerUp: _end,
+                  onPointerCancel: _end,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onPanStart: (details) {
+                      // Listener handles pointer coordinates and capture; this keeps touch gestures active.
+                    },
+                    child: CustomPaint(
+                      painter: _GimbalPainter(
+                        position: _position,
+                        trail: List<Offset>.unmodifiable(_trail),
+                        accent: widget.accent,
+                        isThrottle: widget.isThrottle,
+                        active: _dragging,
+                      ),
+                      child: const SizedBox.expand(),
                     ),
-                    child: const SizedBox.expand(),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            },
+          ),
           const SizedBox(height: 15),
           Row(
             children: [
-              Expanded(child: _Readout(label: firstLabel, value: firstValue, accent: widget.accent)),
-              Expanded(child: _Readout(label: secondLabel, value: secondValue, accent: widget.accent)),
+              Expanded(
+                child: _Readout(
+                  label: firstLabel,
+                  value: firstValue,
+                  accent: widget.accent,
+                ),
+              ),
+              Expanded(
+                child: _Readout(
+                  label: secondLabel,
+                  value: secondValue,
+                  accent: widget.accent,
+                ),
+              ),
             ],
           ),
         ],
@@ -216,7 +251,11 @@ class _DroneJoystickState extends State<DroneJoystick>
 }
 
 class _Readout extends StatelessWidget {
-  const _Readout({required this.label, required this.value, required this.accent});
+  const _Readout({
+    required this.label,
+    required this.value,
+    required this.accent,
+  });
   final String label;
   final String value;
   final Color accent;
@@ -224,9 +263,24 @@ class _Readout extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      Text(label, style: const TextStyle(color: Color(0xFF8B91A5), fontSize: 10, letterSpacing: 1.6)),
+      Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF8B91A5),
+          fontSize: 10,
+          letterSpacing: 1.6,
+        ),
+      ),
       const SizedBox(height: 5),
-      Text(value, style: TextStyle(color: accent, fontSize: 18, fontFamily: 'monospace', fontWeight: FontWeight.w600)),
+      Text(
+        value,
+        style: TextStyle(
+          color: accent,
+          fontSize: 18,
+          fontFamily: 'monospace',
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     ],
   );
 }
@@ -253,16 +307,24 @@ class _GimbalPainter extends CustomPainter {
     final radius = size.width * .13;
     final rect = Offset.zero & size;
 
-    final bg = Paint()..shader = const RadialGradient(
-      center: Alignment(0, -.28), radius: 1.2,
-      colors: [Color(0xFF1D2030), Color(0xFF10121A)],
-    ).createShader(rect);
-    final well = RRect.fromRectAndRadius(rect, Radius.circular(size.width * .14));
+    final bg = Paint()
+      ..shader = const RadialGradient(
+        center: Alignment(0, -.28),
+        radius: 1.2,
+        colors: [Color(0xFF1D2030), Color(0xFF10121A)],
+      ).createShader(rect);
+    final well = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(size.width * .14),
+    );
     canvas.drawRRect(well, bg);
-    canvas.drawRRect(well, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..color = accent.withValues(alpha: active ? .85 : .35));
+    canvas.drawRRect(
+      well,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4
+        ..color = accent.withValues(alpha: active ? .85 : .35),
+    );
 
     final guidePaint = Paint()
       ..style = PaintingStyle.stroke
@@ -271,44 +333,107 @@ class _GimbalPainter extends CustomPainter {
     for (final factor in [.25, .5, .75, 1.0]) {
       canvas.drawCircle(center, travel * factor, guidePaint);
     }
-    canvas.drawLine(Offset(center.dx - travel, center.dy), Offset(center.dx + travel, center.dy), guidePaint);
-    canvas.drawLine(Offset(center.dx, center.dy - travel), Offset(center.dx, center.dy + travel), guidePaint);
+    canvas.drawLine(
+      Offset(center.dx - travel, center.dy),
+      Offset(center.dx + travel, center.dy),
+      guidePaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx, center.dy - travel),
+      Offset(center.dx, center.dy + travel),
+      guidePaint,
+    );
 
     if (isThrottle) {
-      final gaugeRect = Rect.fromLTWH(size.width * .07, size.height * .13, 4, size.height * .74);
-      canvas.drawRRect(RRect.fromRectAndRadius(gaugeRect, const Radius.circular(3)), Paint()..color = const Color(0xFF0B0D13));
+      final gaugeRect = Rect.fromLTWH(
+        size.width * .07,
+        size.height * .13,
+        4,
+        size.height * .74,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(gaugeRect, const Radius.circular(3)),
+        Paint()..color = const Color(0xFF0B0D13),
+      );
       final fillHeight = gaugeRect.height * ((position.dy + 1) / 2);
-      final fillRect = Rect.fromLTWH(gaugeRect.left, gaugeRect.bottom - fillHeight, gaugeRect.width, fillHeight);
-      canvas.drawRRect(RRect.fromRectAndRadius(fillRect, const Radius.circular(3)), Paint()
-        ..shader = LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter,
-          colors: [accent.withValues(alpha: .5), accent]).createShader(gaugeRect));
+      final fillRect = Rect.fromLTWH(
+        gaugeRect.left,
+        gaugeRect.bottom - fillHeight,
+        gaugeRect.width,
+        fillHeight,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(fillRect, const Radius.circular(3)),
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [accent.withValues(alpha: .5), accent],
+          ).createShader(gaugeRect),
+      );
     }
 
     if (trail.length > 1) {
-      final trailPaint = Paint()..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
+      final trailPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
       for (var i = 1; i < trail.length; i++) {
         trailPaint
           ..color = accent.withValues(alpha: i / trail.length * .35)
           ..strokeWidth = size.width * .025 * i / trail.length;
         canvas.drawLine(
-          Offset(center.dx + trail[i - 1].dx * travel, center.dy - trail[i - 1].dy * travel),
-          Offset(center.dx + trail[i].dx * travel, center.dy - trail[i].dy * travel),
+          Offset(
+            center.dx + trail[i - 1].dx * travel,
+            center.dy - trail[i - 1].dy * travel,
+          ),
+          Offset(
+            center.dx + trail[i].dx * travel,
+            center.dy - trail[i].dy * travel,
+          ),
           trailPaint,
         );
       }
     }
 
-    final knobCenter = Offset(center.dx + position.dx * travel, center.dy - position.dy * travel);
-    canvas.drawCircle(knobCenter + Offset(0, 5), radius * 1.12, Paint()..color = Colors.black.withValues(alpha: .45)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8));
-    canvas.drawCircle(knobCenter, radius, Paint()..shader = RadialGradient(
-      center: const Alignment(-.35, -.45),
-      colors: [Color.lerp(Colors.white, accent, .45)!, accent, Color.lerp(accent, Colors.black, .45)!],
-    ).createShader(Rect.fromCircle(center: knobCenter, radius: radius)));
-    canvas.drawCircle(knobCenter, radius * .62, Paint()..style = PaintingStyle.stroke..strokeWidth = 1..color = Colors.white.withValues(alpha: .28));
+    final knobCenter = Offset(
+      center.dx + position.dx * travel,
+      center.dy - position.dy * travel,
+    );
+    canvas.drawCircle(
+      knobCenter + Offset(0, 5),
+      radius * 1.12,
+      Paint()
+        ..color = Colors.black.withValues(alpha: .45)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+    );
+    canvas.drawCircle(
+      knobCenter,
+      radius,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-.35, -.45),
+          colors: [
+            Color.lerp(Colors.white, accent, .45)!,
+            accent,
+            Color.lerp(accent, Colors.black, .45)!,
+          ],
+        ).createShader(Rect.fromCircle(center: knobCenter, radius: radius)),
+    );
+    canvas.drawCircle(
+      knobCenter,
+      radius * .62,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = Colors.white.withValues(alpha: .28),
+    );
   }
 
   @override
   bool shouldRepaint(covariant _GimbalPainter oldDelegate) =>
-      oldDelegate.position != position || oldDelegate.active != active ||
-      oldDelegate.accent != accent || oldDelegate.trail != trail || oldDelegate.isThrottle != isThrottle;
+      oldDelegate.position != position ||
+      oldDelegate.active != active ||
+      oldDelegate.accent != accent ||
+      oldDelegate.trail != trail ||
+      oldDelegate.isThrottle != isThrottle;
 }
