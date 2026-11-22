@@ -730,10 +730,7 @@ class _FlightScreenState extends State<FlightScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final joystickSize = (constraints.maxHeight * 0.69).clamp(
-              125.0,
-              330.0,
-            );
+            final joystickSize = (constraints.maxHeight * 0.58).clamp(120.0, 290.0);
 
             return Column(
               children: [
