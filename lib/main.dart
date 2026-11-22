@@ -481,7 +481,6 @@ class _FlightScreenState extends State<FlightScreen> {
   }
 
   void _disconnect() {
-    
     _rcTimer?.cancel();
     // Trimitem o comandă neutră înainte de închiderea conexiunii.
     if (_rcConnected && _rcChannel != null) {
@@ -749,7 +748,7 @@ class _FlightScreenState extends State<FlightScreen> {
                           flex: 4,
                           child: _joystickArea(
                             accent: violet,
-                            title: 'THROTTLE / YAW',
+                            title: '',
                             child: DroneJoystick(
                               title: 'LEFT STICK',
                               subtitle: 'THROTTLE / YAW',
@@ -778,7 +777,7 @@ class _FlightScreenState extends State<FlightScreen> {
                           flex: 4,
                           child: _joystickArea(
                             accent: mint,
-                            title: 'PITCH / ROLL',
+                            title: '',
                             child: DroneJoystick(
                               title: 'RIGHT STICK',
                               subtitle: 'PITCH / ROLL',
@@ -941,21 +940,23 @@ class _FlightScreenState extends State<FlightScreen> {
     return Column(
       children: [
         Expanded(child: Center(child: child)),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 5),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: accent,
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2.0,
-              shadows: [
-                Shadow(color: accent.withValues(alpha: 0.45), blurRadius: 12),
-              ],
+
+        if (title.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 5),
+            child: Text(
+              title,
+              style: TextStyle(
+                color: accent,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 2.0,
+                shadows: [
+                  Shadow(color: accent.withValues(alpha: 0.45), blurRadius: 12),
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -1006,7 +1007,6 @@ class _FlightScreenState extends State<FlightScreen> {
         ),
         const SizedBox(height: 10),
 
-        
         _controlButton(
           label: navAltHoldRequested ? 'ALT HOLD CMD ON' : 'NAV ALTHOLD',
           icon: Icons.height,

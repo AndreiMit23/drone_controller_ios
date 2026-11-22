@@ -174,7 +174,7 @@ class _DroneJoystickState extends State<DroneJoystick>
           )),
           const SizedBox(height: 14),
           LayoutBuilder(builder: (context, constraints) {
-            final gateSize = math.min(widget.size, constraints.maxWidth);
+            final gateSize = math.min(widget.size, math.min(constraints.maxWidth,constraints.maxHeight));
             return SizedBox(
               width: gateSize,
               height: gateSize,
